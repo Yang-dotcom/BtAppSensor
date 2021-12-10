@@ -2,6 +2,9 @@ package com.example.myapplication;
 
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -18,6 +21,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class MainActivity extends AppCompatActivity {
     private final UUID PORT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");//Serial Port Service ID
@@ -34,6 +39,10 @@ public class MainActivity extends AppCompatActivity {
     BufferedReader btInputStream;
     int bufferPosition;
     boolean stopThread;
+    int capacity = 60;
+    BlockingQueue<String> queue = new LinkedBlockingQueue<>(capacity);
+    public Reader reader;
+    Activity act = MainActivity.this;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         temp = (TextView) findViewById(R.id.temp);
         address = (TextView) findViewById(R.id.address);
         textView = (TextView) findViewById(R.id.textView);
+        reader = new Reader(queue, stopThread, temp, act);
         setUiEnabled(false);
 
     }
@@ -136,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
                 setUiEnabled(true);
                 deviceConnected=true;
                 beginListenForData();
-                textView.append("\nConnection Opened!\n");
+                textView.setText("\nConnection Opened!\n");
             }
 
         }
@@ -146,7 +156,6 @@ public class MainActivity extends AppCompatActivity {
     {
         final Handler handler = new Handler();
         stopThread = false;
-        buffer = new byte[1024/2/2];
         BufferedReader btInputStream = new BufferedReader(new InputStreamReader(inputStream));
         Thread thread  = new Thread(new Runnable()
 
@@ -164,24 +173,32 @@ public class MainActivity extends AppCompatActivity {
                             //inputStream.read(rawBytes);
                              //String string=new String(rawBytes, StandardCharsets.UTF_8);
                             String string = btInputStream.readLine();
-                            handler.post(new Runnable() {
+                            queue.put(string);
+                            System.out.println("thread1 working");
+                           /*handler.post(new Runnable() {
                                 public void run()
                                 {
-                                    temp.setText(string);
+                                    try {
+                                        temp.setText(queue.take());
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
                                 }
-                            });
+                            });*/
 
                         }
                     }
-                    catch (IOException ex)
+                    catch (IOException | InterruptedException ex)
                     {
                         stopThread = true;
+                        reader.stopThread = true;
                     }
                 }
             }
         });
 
         thread.start();
+        new Thread(reader).start();
     }
 
     public void onClickSend(View view) {
@@ -198,6 +215,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickStop(View view) throws IOException {
         stopThread = true;
+        reader.stopThread = true;
         outputStream.close();
         inputStream.close();
         socket.close();
@@ -212,4 +230,10 @@ public class MainActivity extends AppCompatActivity {
         temp.setText("");
     }
 
+    public void updateText(String updatedText){
+        textView.setText(updatedText);
+    }
+
 }
+
+
