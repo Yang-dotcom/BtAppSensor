@@ -28,47 +28,45 @@ public class MainActivity extends AppCompatActivity {
     private final UUID PORT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");//Serial Port Service ID
     private BluetoothDevice device;
     private BluetoothSocket socket;
-    private OutputStream outputStream;
     private InputStream inputStream;
-    Button startButton, sendButton,clearButton,stopButton;
+    Button startButton,clearButton,stopButton;
     TextView address, pressure, temp, textView;
     EditText editText;
     boolean deviceConnected=false;
-    Thread thread;
-    byte buffer[];
-    BufferedReader btInputStream;
-    int bufferPosition;
     boolean stopThread;
     int capacity = 60;
     BlockingQueue<String> queue = new LinkedBlockingQueue<>(capacity);
+    public Worker worker;
     public Reader reader;
     Activity act = MainActivity.this;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         startButton = (Button) findViewById(R.id.buttonStart);
-        sendButton = (Button) findViewById(R.id.buttonSend);
         clearButton = (Button) findViewById(R.id.buttonClear);
         stopButton = (Button) findViewById(R.id.buttonStop);
-        editText = (EditText) findViewById(R.id.editText);
         pressure = (TextView) findViewById(R.id.pressure);
         temp = (TextView) findViewById(R.id.temp);
         address = (TextView) findViewById(R.id.address);
         textView = (TextView) findViewById(R.id.textView);
-        reader = new Reader(queue, stopThread, temp, act);
+        worker = new Worker(queue, stopThread, temp, act);
+        reader = new Reader(queue, stopThread, inputStream);
         setUiEnabled(false);
 
     }
+    // Custom Switch to turn on/off clear/stop btn when startbtn is clicked
     public void setUiEnabled(boolean bool)
     {
         startButton.setEnabled(!bool);
-        sendButton.setEnabled(bool);
         stopButton.setEnabled(bool);
         textView.setEnabled(bool);
 
     }
 
+    /* Initialize a BluetoothDevice class using .getremoteDevice method on bluetoothadapter, which we got through getdefaultadapter method;
+        return true if the BluetoothDevice with name "CTechLogger" is found in the list of previously connected devices, otherwise return false*/
     public boolean BTinit() {
         boolean found = false;
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -87,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         Set<BluetoothDevice> bondedDevices = bluetoothAdapter.getBondedDevices();
         if (bondedDevices.isEmpty()) {
             Toast.makeText(getApplicationContext(), "Please Pair the Device first", Toast.LENGTH_SHORT).show();
-            pressure.append("Device not paired");
+            pressure.setText("Device not paired");
         } else {
             String device_name = "CTechLogger";
             for (BluetoothDevice iterator : bondedDevices) {
@@ -105,6 +103,9 @@ public class MainActivity extends AppCompatActivity {
         return found;
     }
 
+
+    /* create a bluetooth socket using the BluetoothDevice device and having port = PORT_UUID, and connect to it.
+    *  In case of successful connection, the function will procceed to create an InputStream inputstream object from socket.getInputStream() */
     public boolean BTconnect()
     {
         boolean connected=true;
@@ -114,35 +115,27 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
             connected=false;
-            textView.append("\nConnection not Opened!\n");
+            textView.setText("\nConnection not Opened!\n");
         }
         if(connected)
         {
             try {
-                outputStream=socket.getOutputStream();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
                 inputStream=socket.getInputStream();
-                BufferedReader btInputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
-
-
-
         return connected;
     }
 
-
+    // Start Button click method
     public void onClickStart(View view) {
         if(BTinit())
         {
             if(BTconnect())
             {
+                // if Both BTinit() and BTconnect() return true, enable clear/stop btn
+                // call beginListenForData()
                 setUiEnabled(true);
                 deviceConnected=true;
                 beginListenForData();
@@ -154,69 +147,21 @@ public class MainActivity extends AppCompatActivity {
 
     void beginListenForData()
     {
-        final Handler handler = new Handler();
-        stopThread = false;
-        BufferedReader btInputStream = new BufferedReader(new InputStreamReader(inputStream));
-        Thread thread  = new Thread(new Runnable()
+        // initialize a worker/reader thread, then start them with a Thread wrapper.
 
-        {
-            public void run()
-            {
-                while(!Thread.currentThread().isInterrupted() && !stopThread)
-                {
-                    try
-                    {
-                        int byteCount = inputStream.available();
-                        if(byteCount > 0)
-                        {
-                            //byte[] rawBytes = new byte[byteCount];
-                            //inputStream.read(rawBytes);
-                             //String string=new String(rawBytes, StandardCharsets.UTF_8);
-                            String string = btInputStream.readLine();
-                            queue.put(string);
-                            System.out.println("thread1 working");
-                           /*handler.post(new Runnable() {
-                                public void run()
-                                {
-                                    try {
-                                        temp.setText(queue.take());
-                                    } catch (InterruptedException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            });*/
-
-                        }
-                    }
-                    catch (IOException | InterruptedException ex)
-                    {
-                        stopThread = true;
-                        reader.stopThread = true;
-                    }
-                }
-            }
-        });
-
-        thread.start();
+        // a share BlockingQueue queue is utilized for both threads as to maintain thread-safety
+        //reader thread listens to the logger, receives data as a single line (till \n) and puts a string in a blockingqueue
+        //worker thread processes one string at a time from the blockingqueue and print them out on UI
+        worker = new Worker(queue, stopThread, temp, act);
+        reader = new Reader(queue, stopThread, inputStream);
         new Thread(reader).start();
-    }
-
-    public void onClickSend(View view) {
-        String string = editText.getText().toString();
-        string.concat("\n");
-        try {
-            outputStream.write(string.getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        textView.append("\nSent Data:"+string+"\n");
-
+        new Thread(worker).start();
     }
 
     public void onClickStop(View view) throws IOException {
-        stopThread = true;
+        // stop reader and worker threads, closes socket/inputStream
         reader.stopThread = true;
-        outputStream.close();
+        worker.stopThread = true;
         inputStream.close();
         socket.close();
         setUiEnabled(false);
@@ -225,13 +170,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickClear(View view) {
+        //clears textView table
         textView.setText("");
         pressure.setText("");
         temp.setText("");
-    }
-
-    public void updateText(String updatedText){
-        textView.setText(updatedText);
     }
 
 }

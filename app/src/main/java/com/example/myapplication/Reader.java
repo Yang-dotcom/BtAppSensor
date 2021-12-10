@@ -5,39 +5,41 @@ import android.content.Context;
 import android.os.Handler;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.concurrent.BlockingQueue;
 
 public class Reader implements Runnable {
-    private TextView temp;
     public Boolean stopThread;
     private BlockingQueue<String> queue;
-    final private Activity act;
+    InputStream inputStream;
     String str;
 
-    public Reader(BlockingQueue<String> queue1, Boolean stopThread1, TextView temp, Activity act){
-        this.temp = temp;
+    public Reader(BlockingQueue<String> queue1, Boolean stopThread1, InputStream inputStream){
         this.queue = queue1;
         this.stopThread = stopThread1;
-        this.act = act;
+        this.inputStream = inputStream;
 
     }
 
     @Override
     public void run(){
+        BufferedReader btInputStream = new BufferedReader(new InputStreamReader(inputStream));
         while(!Thread.currentThread().isInterrupted() && !stopThread){
             try {
-                str = queue.take();
-                Thread.sleep(1000);
-                System.out.println("Thread 2: "+str + stopThread);
-                act.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        temp.setText(str);
-                    }
-                });
+                int byteCount = inputStream.available();
+                if(byteCount > 0){
+                    String string = btInputStream.readLine();
+                    queue.put(string);
+                    System.out.println("thread1 working");
+                }
 
-            } catch (InterruptedException e) {
+
+            } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
+                stopThread =true;
             }
         }
     }
