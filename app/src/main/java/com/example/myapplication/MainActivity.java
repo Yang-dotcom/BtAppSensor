@@ -3,8 +3,8 @@ package com.example.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -15,10 +15,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.os.Handler;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
@@ -51,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
         temp = (TextView) findViewById(R.id.temp);
         address = (TextView) findViewById(R.id.address);
         textView = (TextView) findViewById(R.id.textView);
+
+
         worker = new Worker(queue, stopThread, temp, act);
         reader = new Reader(queue, stopThread, inputStream);
         setUiEnabled(false);
@@ -66,7 +66,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /* Initialize a BluetoothDevice class using .getremoteDevice method on bluetoothadapter, which we got through getdefaultadapter method;
+        if Bluetooth is not enabled on the android device yet, request permission to enable it and proceed with activation.
         return true if the BluetoothDevice with name "CTechLogger" is found in the list of previously connected devices, otherwise return false*/
+    @SuppressLint("SetTextI18n")
     public boolean BTinit() {
         boolean found = false;
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -93,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
                     device = bluetoothAdapter.getRemoteDevice(String.valueOf(iterator));
                     found = true;
                     pressure.setText(iterator.getName());
-                    temp.setText(device.getAddress());
+                    address.setText(device.getAddress());
                     break;
                 }
 
@@ -139,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
                 setUiEnabled(true);
                 deviceConnected=true;
                 beginListenForData();
+                Toast.makeText(getApplicationContext(), "Please Pair the Device first", Toast.LENGTH_SHORT).show();
                 textView.setText("\nConnection Opened!\n");
             }
 
