@@ -1,6 +1,8 @@
 package com.example.myapplication;
 
 
+import android.graphics.Color;
+import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -10,11 +12,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.os.Handler;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.*;
 import java.util.Set;
@@ -23,20 +22,22 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class MainActivity extends AppCompatActivity {
+    public static Handler UIHandler;
     private final UUID PORT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");//Serial Port Service ID
     private BluetoothDevice device;
     private BluetoothSocket socket;
     private InputStream inputStream;
     Button startButton,clearButton,stopButton;
-    TextView address, pressure, temp, textView;
+    TextView textView;
     EditText editText;
     boolean deviceConnected=false;
     boolean stopThread;
-    int capacity = 60;
-    BlockingQueue<String> queue = new LinkedBlockingQueue<>(capacity);
+    int capacity = 100;
+    LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>(capacity);
     public Worker worker;
     public Reader reader;
     Activity act = MainActivity.this;
+    TableLayout tblLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,14 +46,14 @@ public class MainActivity extends AppCompatActivity {
         startButton = (Button) findViewById(R.id.buttonStart);
         clearButton = (Button) findViewById(R.id.buttonClear);
         stopButton = (Button) findViewById(R.id.buttonStop);
-        pressure = (TextView) findViewById(R.id.pressure);
-        temp = (TextView) findViewById(R.id.temp);
-        address = (TextView) findViewById(R.id.address);
         textView = (TextView) findViewById(R.id.textView);
+        //TableLayout tblLayout = (TableLayout)findViewById(R.id.tableLayout);
+        //getWindow().getDecorView().setBackgroundColor(Color.WHITE);
 
 
-        worker = new Worker(queue, stopThread, temp, act);
-        reader = new Reader(queue, stopThread, inputStream);
+        //initialization of reader and worker threads.
+        //worker = new Worker(queue, stopThread,act, tblLayout);
+        //reader = new Reader(queue, stopThread, inputStream);
         setUiEnabled(false);
 
     }
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
         startButton.setEnabled(!bool);
         stopButton.setEnabled(bool);
         textView.setEnabled(bool);
+        clearButton.setEnabled(bool);
 
     }
 
@@ -87,15 +89,12 @@ public class MainActivity extends AppCompatActivity {
         Set<BluetoothDevice> bondedDevices = bluetoothAdapter.getBondedDevices();
         if (bondedDevices.isEmpty()) {
             Toast.makeText(getApplicationContext(), "Please Pair the Device first", Toast.LENGTH_SHORT).show();
-            pressure.setText("Device not paired");
         } else {
             String device_name = "CTechLogger";
             for (BluetoothDevice iterator : bondedDevices) {
                 if (iterator.getName().equals(device_name)) {
                     device = bluetoothAdapter.getRemoteDevice(String.valueOf(iterator));
                     found = true;
-                    pressure.setText(iterator.getName());
-                    address.setText(device.getAddress());
                     break;
                 }
 
@@ -141,7 +140,6 @@ public class MainActivity extends AppCompatActivity {
                 setUiEnabled(true);
                 deviceConnected=true;
                 beginListenForData();
-                Toast.makeText(getApplicationContext(), "Please Pair the Device first", Toast.LENGTH_SHORT).show();
                 textView.setText("\nConnection Opened!\n");
             }
 
@@ -155,7 +153,8 @@ public class MainActivity extends AppCompatActivity {
         // a share BlockingQueue queue is utilized for both threads as to maintain thread-safety
         //reader thread listens to the logger, receives data as a single line (till \n) and puts a string in a blockingqueue
         //worker thread processes one string at a time from the blockingqueue and print them out on UI
-        worker = new Worker(queue, stopThread, temp, act);
+        TableLayout tblLayout = (TableLayout)findViewById(R.id.tableLayout);
+        worker = new Worker(queue, stopThread, act, tblLayout);
         reader = new Reader(queue, stopThread, inputStream);
         new Thread(reader).start();
         new Thread(worker).start();
@@ -175,9 +174,16 @@ public class MainActivity extends AppCompatActivity {
     public void onClickClear(View view) {
         //clears textView table
         textView.setText("");
-        pressure.setText("");
-        temp.setText("");
+
     }
+
+   /* static {
+        UIHandler = new Handler(Looper.getMainLooper());
+    }*/
+
+ /*   public static void runOnUI(Runnable runnable) {
+        UIHandler.post(runnable);
+    }*/
 
 }
 

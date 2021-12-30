@@ -25,6 +25,7 @@ public class SubWorker implements Runnable {
 
 
     public void run(){
+        boolean stopThread = false;
         while (!Thread.currentThread().isInterrupted()){
             try {
                 one_str_values = sub_queue.take();
@@ -37,15 +38,15 @@ public class SubWorker implements Runnable {
             //tempe = Float.parseFloat(values[1].substring(1));
             //pressu = Float.parseFloat(values[2].substring(1));
 
-            System.out.println("Thread 4: " + values[1]);
+            System.out.println(Thread.currentThread().getName() + values[1] + " --- " + values[2]);
             act.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    temp.setText(values[0]);
+                    temp.setText(values[2]);
                 }
             });
         }
+        System.out.println("thread-aux not working");
         }
 
 }
-// NEED TO CHECK WHEN "$MEA	26508	12 ERR No new sample"
