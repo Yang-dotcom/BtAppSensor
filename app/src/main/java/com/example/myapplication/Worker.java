@@ -1,28 +1,24 @@
 package com.example.myapplication;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.view.View;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 
-// to implement inputStream.close();
-//        socket.close(); on this thread
+
 public class Worker implements Runnable {
     TableLayout tblLayout;
-    Integer table_refresh_ms = 300;
+    Integer table_refresh_ms = 1000;
     public Boolean stopThread;
     private final BlockingQueue<String> queue;
-    LinkedBlockingQueue[] vet_queues = new LinkedBlockingQueue[6];
     Activity act;
     String str;
     String[] vet_str_per_sensor;
-    String [][] vet_single_data;
     Integer n_sensors;
     ProcessedInput processedInput;
 
@@ -52,46 +48,45 @@ public class Worker implements Runnable {
         //looping step
         while(!Thread.currentThread().isInterrupted() && !stopThread){
             try {
+                // take a single reading from the blockingqueue, in string form
                 str = queue.take();
-                // vet_str_per_sensor will have 7 elements given 6 sensors, the first is $MEA n%d, so start extrapolating from [1] to [6]
-                //processedInput = new ProcessedInput(n_sensors, str);
-                //processedInput.run();
+                //split the str into an array of strings, with the split occurring when "s" is encountered. the character "s" is not included
                 vet_str_per_sensor = str.split("s");
-                //System.out.println("Thread 2: "+ Arrays.toString(processedInput.mtx_str_per_sensor[0])+ str);
+                // create an instance of a class ProcessedInput that will process the str and create arrays of (int) sensor_Id, (float)pressure, (float) temperature
+                // after running the method .run();
+                processedInput = new ProcessedInput(n_sensors, str);
+                processedInput.run();
+                //System.out.println("Thread 2:"+ str);
+
+                // we change UI elements on the UI thread by running the method .runOnUiThread() on the activity
                 act.runOnUiThread(new Runnable() {
+                    @SuppressLint("SetTextI18n")
                     @Override
                     public void run() {
-                        TableRow row = (TableRow)tblLayout.getChildAt(1);
-                        TextView act_str = (TextView)row.getChildAt(0); // get child index on particular row
-                        act_str.setText(vet_str_per_sensor[1]);
-                        /*for(int i=0;i<n_sensors;i++)
+
+                        // loop through the cells in the tblLayout
+                        for(int i=0;i<n_sensors;i++)
                         {
-                            TableRow row = (TableRow)tblLayout.getChildAt(i);
-                            TextView act_str = (TextView)row.getChildAt(0); // get child index on particular row
-                            act_str.setText(vet_str_per_sensor[i+1]);
-                            /*for(int j=0;j<1;j++){
-                                TextView act_str = (TextView)row.getChildAt(j); // get child index on particular row
-                                act_str.setText(vet_str_per_sensor[i+1]);
-                            }//
-                        }*/
+                            // get row  i of the tbl
+                            TableRow row = (TableRow)tblLayout.getChildAt(i+1); // get child index on particular row
+
+                            // display sensor_id of i-th sensor on cell[i][0]
+                            TextView sensor = (TextView)row.getChildAt(0);
+                            sensor.setText((processedInput.sensor_ID[i]).toString());
+
+                            // display pressure of i-th sensor on cell[i][1]
+                            TextView pressure = (TextView)row.getChildAt(1);
+                            pressure.setText((processedInput.pressure[i]).toString());
+
+                            // display temp of i-th sensor on cell[i][2]
+                            TextView temp = (TextView)row.getChildAt(2);
+                            temp.setText((processedInput.temp[i]).toString());
+
+                        }
                     }
                 });
+                // control update rate of the table by making the thread go to sleep for table_refresh_ms milliseconds
                 Thread.sleep(table_refresh_ms);
-                // split str into an array of strings, where each element
-                // contains the data related to a specific sensor, with the
-                // splitting happening at the letter "s" (stands for sensor).
-                // the letter s will not be included in the elements of the array.
-                //vet_str_per_sensor = str.split("s");
-                // * vet_str_per_sensor = str.split(" ");
-                //for (int j = 0; j< n_sensors; j++){
-
-
-                    // vet_str_per_sensor[j+1] since sensors measurament start on the second element onward
-                    // of vet_str_per_sensor
-                    //vet_queues[j].put(vet_str_per_sensor[j+1]);
-                    //vet_queues[j].put(str);
-                //}
-
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 stopThread = true;

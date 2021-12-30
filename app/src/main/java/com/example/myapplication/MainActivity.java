@@ -1,7 +1,6 @@
 package com.example.myapplication;
 
 
-import android.graphics.Color;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -12,28 +11,23 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
-import android.os.Handler;
 import android.view.View;
 
 import java.io.*;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class MainActivity extends AppCompatActivity {
-    public static Handler UIHandler;
     private final UUID PORT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");//Serial Port Service ID
     private BluetoothDevice device;
     private BluetoothSocket socket;
     private InputStream inputStream;
     Button startButton,clearButton,stopButton;
     TextView textView;
-    EditText editText;
     boolean deviceConnected=false;
     boolean stopThread;
     int capacity = 100;
-    LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>(capacity);
     public Worker worker;
     public Reader reader;
     Activity act = MainActivity.this;
@@ -47,13 +41,7 @@ public class MainActivity extends AppCompatActivity {
         clearButton = (Button) findViewById(R.id.buttonClear);
         stopButton = (Button) findViewById(R.id.buttonStop);
         textView = (TextView) findViewById(R.id.textView);
-        //TableLayout tblLayout = (TableLayout)findViewById(R.id.tableLayout);
-        //getWindow().getDecorView().setBackgroundColor(Color.WHITE);
-
-
-        //initialization of reader and worker threads.
-        //worker = new Worker(queue, stopThread,act, tblLayout);
-        //reader = new Reader(queue, stopThread, inputStream);
+        setTitle("CTech Reader");
         setUiEnabled(false);
 
     }
@@ -63,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         startButton.setEnabled(!bool);
         stopButton.setEnabled(bool);
         textView.setEnabled(bool);
-        clearButton.setEnabled(bool);
+        clearButton.setEnabled(!bool);
 
     }
 
@@ -153,9 +141,12 @@ public class MainActivity extends AppCompatActivity {
         // a share BlockingQueue queue is utilized for both threads as to maintain thread-safety
         //reader thread listens to the logger, receives data as a single line (till \n) and puts a string in a blockingqueue
         //worker thread processes one string at a time from the blockingqueue and print them out on UI
+
+        // queue and tbllayout have to be initialized in the same method where the threads are initialized to prevent issues
+        LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>(capacity);
         TableLayout tblLayout = (TableLayout)findViewById(R.id.tableLayout);
         worker = new Worker(queue, stopThread, act, tblLayout);
-        reader = new Reader(queue, stopThread, inputStream);
+        reader = new Reader(queue, stopThread, inputStream, socket);
         new Thread(reader).start();
         new Thread(worker).start();
     }
@@ -168,23 +159,22 @@ public class MainActivity extends AppCompatActivity {
         socket.close();
         setUiEnabled(false);
         deviceConnected=false;
-        textView.append("\nConnection Closed!\n");
+        textView.setText("\nConnection Closed!\n");
     }
 
     public void onClickClear(View view) {
         //clears textView table
         textView.setText("");
+        TableLayout tblLayout = (TableLayout)findViewById(R.id.tableLayout);
+        for(int i = 1; i <7; i++){
+            TableRow row = (TableRow)tblLayout.getChildAt(i);
+            for (int j=0; j<3; j++){
+                TextView txt = (TextView)row.getChildAt(j);
+                txt.setText("");
+            }
+        }
 
     }
-
-   /* static {
-        UIHandler = new Handler(Looper.getMainLooper());
-    }*/
-
- /*   public static void runOnUI(Runnable runnable) {
-        UIHandler.post(runnable);
-    }*/
-
 }
 
 
