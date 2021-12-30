@@ -56,7 +56,7 @@ public class Worker implements Runnable {
                 // after running the method .run();
                 processedInput = new ProcessedInput(n_sensors, str);
                 processedInput.run();
-                //System.out.println("Thread 2:"+ str);
+                System.out.println("Thread 2:"+ str);
 
                 // we change UI elements on the UI thread by running the method .runOnUiThread() on the activity
                 act.runOnUiThread(new Runnable() {

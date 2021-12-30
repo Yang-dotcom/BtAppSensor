@@ -1,6 +1,8 @@
 package com.example.myapplication;
 
 
+import java.util.Arrays;
+
 public class ProcessedInput {
     Integer n;
     Integer[] sensor_ID;
@@ -25,7 +27,7 @@ public class ProcessedInput {
         for (int i=0; i<n; i++){
             //single_sensor_data = ["37", "P996.5796", "T24.5816"] example
             single_sensor_data = vet_sensors[i+1].split("\t");
-            //System.out.println(i+"Thread 2: "+ Arrays.toString(single_sensor_data)+ Arrays.toString(vet_sensors));
+            System.out.println(i+"Thread 2: "+ Arrays.toString(single_sensor_data)+ Arrays.toString(vet_sensors));
             sensor_ID[i] = Integer.parseInt(single_sensor_data[0]);
             pressure[i] = Float.parseFloat(single_sensor_data[1].substring(1));
             temp[i] = Float.parseFloat(single_sensor_data[2].substring(1));

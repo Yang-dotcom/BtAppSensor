@@ -32,8 +32,8 @@ public class Reader implements Runnable {
                 Boolean byteCount = btInputStream.ready();
                 if(byteCount){
                     String string = btInputStream.readLine();
-                    boolean isFound = string.contains("$MEA");
-                    if (string.length() > 25 && isFound){
+                    boolean isFound = string.contains("$MEA") && !string.contains("ERR");
+                    if (isFound){
                         // put the reading (a string ending in \n in this case) onto a blocking queue
                         //a blockingqueue is an array that is shared between threads
                         //if the blockingqueue is at full capacity, the put operation is blocked and a slot is freed
