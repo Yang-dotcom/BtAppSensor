@@ -6,16 +6,15 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 
 
 public class Worker implements Runnable {
     TableLayout tblLayout;
-    Integer table_refresh_ms = 1000;
+    Integer table_refresh_ms = 500;
     public Boolean stopThread;
-    private final BlockingQueue<String> queue;
+    private final LinkedBlockingQueue<String> queue;
     Activity act;
     String str;
     String[] vet_str_per_sensor;
@@ -95,20 +94,6 @@ public class Worker implements Runnable {
     }
 }
 
-
-
-/*    // Create 6 blockinqueues for 6 different subworker threads that will be able to
-    // process info incoming from 6 different sensors
-    void create_subworkers(){
-        Thread daemonThread;
-        for (int i = 0; i< n_sensors; i++){
-            vet_queues[i] = new LinkedBlockingQueue<String>();
-            daemonThread = new Thread(new SubWorker(vet_queues[i], temp, act));
-            daemonThread.setDaemon(true);
-            daemonThread.start();
-        }
-    }
-}*/
 
 
 

@@ -27,11 +27,11 @@ public class MainActivity extends AppCompatActivity {
     TextView textView;
     boolean deviceConnected=false;
     boolean stopThread;
-    int capacity = 100;
+    int capacity = 1;
     public Worker worker;
     public Reader reader;
     Activity act = MainActivity.this;
-    TableLayout tblLayout;
+    LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>(capacity);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,7 +143,6 @@ public class MainActivity extends AppCompatActivity {
         //worker thread processes one string at a time from the blockingqueue and print them out on UI
 
         // queue and tbllayout have to be initialized in the same method where the threads are initialized to prevent issues
-        LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>(capacity);
         TableLayout tblLayout = (TableLayout)findViewById(R.id.tableLayout);
         worker = new Worker(queue, stopThread, act, tblLayout);
         reader = new Reader(queue, stopThread, inputStream, socket);

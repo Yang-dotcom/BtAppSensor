@@ -15,10 +15,10 @@ public class Reader implements Runnable {
     InputStream inputStream;
 
     public Reader(LinkedBlockingQueue<String> queue1, Boolean stopThread1, InputStream inputStream, BluetoothSocket socket){
-        this.socket = socket;
         this.queue = queue1;
         this.stopThread = stopThread1;
         this.inputStream = inputStream;
+        this.socket = socket;
 
     }
 
@@ -29,11 +29,11 @@ public class Reader implements Runnable {
         while(!Thread.currentThread().isInterrupted() && !stopThread){
             try {
                 //check if the inputstream has available data incoming
-                Boolean byteCount = btInputStream.ready();
+                boolean byteCount = btInputStream.ready();
                 if(byteCount){
                     String string = btInputStream.readLine();
-                    boolean isFound = string.contains("$MEA") && !string.contains("ERR");
-                    if (isFound){
+                    boolean isFound = string.contains("$MEA"); //&& !string.contains("ERR");
+                    if (string.length() > 25 && isFound){
                         // put the reading (a string ending in \n in this case) onto a blocking queue
                         //a blockingqueue is an array that is shared between threads
                         //if the blockingqueue is at full capacity, the put operation is blocked and a slot is freed
@@ -48,13 +48,13 @@ public class Reader implements Runnable {
             } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
                 stopThread =true;
-                try {
+                /*try {
                     //close inputstream and btsocket
                     inputStream.close();
                     socket.close();
                 } catch (IOException i) {
                     i.printStackTrace();
-                }
+                }*/
             }
         }
     }
