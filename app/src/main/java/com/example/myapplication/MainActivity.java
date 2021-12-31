@@ -17,6 +17,7 @@ import java.io.*;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
+import android.os.Handler;
 
 public class MainActivity extends AppCompatActivity {
     private final UUID PORT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");//Serial Port Service ID
@@ -144,10 +145,61 @@ public class MainActivity extends AppCompatActivity {
 
         // queue and tbllayout have to be initialized in the same method where the threads are initialized to prevent issues
         TableLayout tblLayout = (TableLayout)findViewById(R.id.tableLayout);
-        worker = new Worker(queue, stopThread, act, tblLayout);
-        reader = new Reader(queue, stopThread, inputStream, socket);
-        new Thread(reader).start();
-        new Thread(worker).start();
+        //worker = new Worker(queue, stopThread, act, tblLayout);
+        //reader = new Reader(queue, stopThread, inputStream, socket);
+        //new Thread(reader).start();
+        final Handler handler = new Handler();
+        stopThread = false;
+        byte[] buffer = new byte[1024];
+        Thread thread  = new Thread(new Runnable()
+        {
+            public void run()
+            {
+                BufferedReader btInputStream = new BufferedReader(new InputStreamReader(inputStream));
+                while(!Thread.currentThread().isInterrupted() && !stopThread)
+                {
+                    try
+                    {
+                        int byteCount = inputStream.available();
+                        if(byteCount > 0)
+                        {
+                            String string = btInputStream.readLine();
+                            boolean isFound = string.contains("$MEA");
+                            if (string.length() > 25 && isFound){
+                                queue.put(string);
+                                System.out.println("thread1 working" + byteCount);
+                            }
+
+                        }
+                    }
+                    catch (IOException | InterruptedException ex)
+                    {
+                        stopThread = true;
+                    }
+                }
+            }
+        });
+        Thread thread2  = new Thread(new Runnable()
+        {
+            public void run()
+            {
+                BufferedReader btInputStream = new BufferedReader(new InputStreamReader(inputStream));
+                while(!Thread.currentThread().isInterrupted() && !stopThread)
+                {
+                    try {
+                        String str2 =  queue.take();
+                        System.out.println("Thread 2:"+ str2);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+        });
+
+        thread.start();
+        thread2.start();
+        //new Thread(worker).start();
     }
 
     public void onClickStop(View view) throws IOException {
