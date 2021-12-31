@@ -2,6 +2,9 @@ package com.example.myapplication;
 
 
 import android.widget.*;
+import android.content.res.Configuration;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -52,6 +55,43 @@ public class MainActivity extends AppCompatActivity {
         setUiEnabled(false);
 
     }
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            reader.stopThread = true;
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            setUiEnabled(false);
+            deviceConnected=false;
+            textView.setText("\nConnection Closed!\n");
+        } else {
+            reader.stopThread = true;
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            setUiEnabled(false);
+            deviceConnected=false;
+            textView.setText("\nConnection Closed!\n");
+        }
+    }
+
+
     // Custom Switch to turn on/off clear/stop btn when startbtn is clicked
     public void setUiEnabled(boolean bool)
     {
@@ -267,8 +307,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickStop(View view) throws IOException {
         // stop reader and worker threads, closes socket/inputStream
-        reader.stopThread = true;
         //worker.stopThread = true;
+        reader.stopThread = true;
         inputStream.close();
         socket.close();
         setUiEnabled(false);
