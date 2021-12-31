@@ -269,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
             processedInput = new ProcessedInput(6, valuestr);
             processedInput.run();
             TableLayout tblLayout = (TableLayout) findViewById(R.id.tableLayout);
-            textView.setText(String.valueOf(processedInput.temp[0]));
+            textView.setText("Measurement n.: "+String.valueOf(k));
 
             // loop through the cells in the tblLayout
             for (int i = 0; i < processedInput.n; i++) {
@@ -279,7 +279,7 @@ public class MainActivity extends AppCompatActivity {
                 // display sensor_id of i-th sensor on cell[i][0]
                 TextView sensor = (TextView) row.getChildAt(0);
                 //sensor.setText((processedInput.sensor_ID[i]).toString());
-                sensor.setText(String.valueOf(k));
+                sensor.setText((processedInput.sensor_ID[i]).toString());
 
                 // display pressure of i-th sensor on cell[i][1]
                 TextView pressure = (TextView) row.getChildAt(1);
@@ -318,13 +318,13 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickClear(View view) {
         //clears textView table
-        textView.setText("");
+        textView.setText("0");
         TableLayout tblLayout = (TableLayout)findViewById(R.id.tableLayout);
         for(int i = 1; i <7; i++){
             TableRow row = (TableRow)tblLayout.getChildAt(i);
             for (int j=0; j<3; j++){
                 TextView txt = (TextView)row.getChildAt(j);
-                txt.setText("");
+                txt.setText("0");
             }
         }
 
