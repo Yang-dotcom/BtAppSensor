@@ -15,6 +15,8 @@ import android.view.View;
 
 import java.io.*;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 import android.os.Handler;
@@ -33,6 +35,10 @@ public class MainActivity extends AppCompatActivity {
     public Reader reader;
     Activity act = MainActivity.this;
     LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>(capacity);
+    ProcessedInput processedInput;
+    String valuestr;
+    Integer k = 0;
+    final Handler myHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,11 +152,11 @@ public class MainActivity extends AppCompatActivity {
         // queue and tbllayout have to be initialized in the same method where the threads are initialized to prevent issues
         TableLayout tblLayout = (TableLayout)findViewById(R.id.tableLayout);
         //worker = new Worker(queue, stopThread, act, tblLayout);
-        //reader = new Reader(queue, stopThread, inputStream, socket);
-        //new Thread(reader).start();
-        final Handler handler = new Handler();
+        reader = new Reader(queue, stopThread, inputStream, socket);
+        new Thread(reader).start();
         stopThread = false;
         byte[] buffer = new byte[1024];
+
         Thread thread  = new Thread(new Runnable()
         {
             public void run()
@@ -174,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     catch (IOException | InterruptedException ex)
                     {
+                        System.out.println("thread1 not working");
                         stopThread = true;
                     }
                 }
@@ -197,15 +204,71 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        thread.start();
-        thread2.start();
+        //thread.start();
+        //thread2.start();
         //new Thread(worker).start();
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    UpdateGUI();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, 0, 300);
     }
+
+    final Runnable myRunnable = new Runnable() {
+        @SuppressLint("SetTextI18n")
+        @Override
+        public void run() {
+
+            //n sensors to be changed dynamically
+            processedInput = new ProcessedInput(6, valuestr);
+            processedInput.run();
+            TableLayout tblLayout = (TableLayout) findViewById(R.id.tableLayout);
+            textView.setText(String.valueOf(processedInput.temp[0]));
+
+            // loop through the cells in the tblLayout
+            for (int i = 0; i < processedInput.n; i++) {
+                // get row  i of the tbl
+                TableRow row = (TableRow) tblLayout.getChildAt(i + 1); // get child index on particular row
+
+                // display sensor_id of i-th sensor on cell[i][0]
+                TextView sensor = (TextView) row.getChildAt(0);
+                //sensor.setText((processedInput.sensor_ID[i]).toString());
+                sensor.setText(String.valueOf(k));
+
+                // display pressure of i-th sensor on cell[i][1]
+                TextView pressure = (TextView) row.getChildAt(1);
+                pressure.setText((processedInput.pressure[i]).toString());
+
+                // display temp of i-th sensor on cell[i][2]
+                TextView temp = (TextView) row.getChildAt(2);
+                temp.setText((processedInput.temp[i]).toString());
+            }
+        }
+    };
+    private void UpdateGUI() throws InterruptedException {
+        try {
+            valuestr = queue.take();
+            System.out.println(valuestr);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        k++;
+        myHandler.post(myRunnable);
+    }
+
+
+
 
     public void onClickStop(View view) throws IOException {
         // stop reader and worker threads, closes socket/inputStream
         reader.stopThread = true;
-        worker.stopThread = true;
+        //worker.stopThread = true;
         inputStream.close();
         socket.close();
         setUiEnabled(false);

@@ -13,6 +13,7 @@ public class Reader implements Runnable {
     public Boolean stopThread;
     private final LinkedBlockingQueue<String> queue;
     InputStream inputStream;
+    private Object InterruptedException;
 
     public Reader(LinkedBlockingQueue<String> queue1, Boolean stopThread1, InputStream inputStream, BluetoothSocket socket){
         this.queue = queue1;
@@ -29,25 +30,22 @@ public class Reader implements Runnable {
         while(!Thread.currentThread().isInterrupted() && !stopThread){
             try {
                 //check if the inputstream has available data incoming
-                boolean byteCount = btInputStream.ready();
-                if(byteCount){
+                int byteCount = inputStream.available();
+                if(byteCount>0 && byteCount<2000){
                     String string = btInputStream.readLine();
-                    boolean isFound = string.contains("$MEA"); //&& !string.contains("ERR");
-                    if (string.length() > 25 && isFound){
+                    boolean isFound = string.contains("$MEA") != string.contains("ERR"); //&& !string.contains("ERR");
+                    if (string.length() > 30 && isFound){
                         // put the reading (a string ending in \n in this case) onto a blocking queue
                         //a blockingqueue is an array that is shared between threads
                         //if the blockingqueue is at full capacity, the put operation is blocked and a slot is freed
                         queue.put(string);
                         System.out.println("thread1 working" + byteCount);
+                    }else {
+                        System.out.println("thread1 not working"+ byteCount);
                     }
-                }else{
-                    System.out.println("thread1 not working"+ byteCount);
-                }
-
-
-            } catch (InterruptedException | IOException e) {
-                e.printStackTrace();
-                stopThread =true;
+            }else if (byteCount > 2000) {
+                    btInputStream.readLine();
+            }
                 /*try {
                     //close inputstream and btsocket
                     inputStream.close();
@@ -55,8 +53,11 @@ public class Reader implements Runnable {
                 } catch (IOException i) {
                     i.printStackTrace();
                 }*/
+        } catch (java.lang.InterruptedException | IOException e) {
+                e.printStackTrace();
+                stopThread =true;
             }
         }
-    }
 
+}
 }

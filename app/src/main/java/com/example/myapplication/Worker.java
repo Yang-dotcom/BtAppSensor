@@ -85,7 +85,7 @@ public class Worker implements Runnable {
                     }
                 });
                 // control update rate of the table by making the thread go to sleep for table_refresh_ms milliseconds
-                Thread.sleep(table_refresh_ms);
+                //Thread.sleep(table_refresh_ms);
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 stopThread = true;
