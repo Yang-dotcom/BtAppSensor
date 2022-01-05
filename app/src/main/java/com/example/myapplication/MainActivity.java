@@ -149,6 +149,25 @@ public class MainActivity extends AppCompatActivity {
         Thread.sleep(400);
         k = 0;
     }
+    private Thread.UncaughtExceptionHandler defaultUEH;
+
+    private void appInitialization() {
+        defaultUEH = Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler(_unCaughtExceptionHandler);
+    }
+
+    private final Thread.UncaughtExceptionHandler _unCaughtExceptionHandler = new Thread.UncaughtExceptionHandler() {
+        @Override
+        public void uncaughtException(@NonNull Thread thread, Throwable ex) {
+            ex.printStackTrace();
+            try {
+                inputStream.close();
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    };
 
     // Custom Switch to turn on/off clear/stop btn when startbtn is clicked
     public void setUiEnabled(boolean bool)
