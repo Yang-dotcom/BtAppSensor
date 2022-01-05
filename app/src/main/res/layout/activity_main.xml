@@ -16,6 +16,32 @@
         android:padding="10sp"
         tools:context=".MainActivity">
 
+        <Button
+            android:id="@+id/connect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="OnClickConnect"
+            android:text="CONNECT"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
+
+        <LinearLayout
+            android:id="@+id/linearLayout3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ListView
+                android:id="@+id/listView"
+                android:layout_width="match_parent"
+                android:layout_height="400dp" />
+        </LinearLayout>
+
         <EditText
 
             android:id="@+id/refresh_rate"
@@ -23,15 +49,16 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
             android:ems="10"
-            android:text="Table Refresh Rate"
+            android:focusableInTouchMode="true"
+            android:imeOptions="actionDone"
+            android:inputType="text"
+            android:minHeight="48dp"
+            android:singleLine="true"
+            android:text="Table Refresh Rate (ms)"
             android:textSize="8sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:singleLine="true"
-            android:imeOptions="actionDone"
-            android:inputType="text"
-            android:focusableInTouchMode="true"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TableLayout
             android:id="@+id/tableLayout"
@@ -273,13 +300,13 @@
                 android:id="@+id/buttonClear"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:includeFontPadding="true"
-                android:onClick="onClickClear"
                 android:background="#009688"
                 android:backgroundTint="#009688"
                 android:fontFamily="sans-serif"
-                android:textColor="#F3F1F1"
-                android:text="clear"/>
+                android:includeFontPadding="true"
+                android:onClick="onClickClear"
+                android:text="BACK"
+                android:textColor="#F3F1F1" />
         </TableRow>
 
         <TextView
@@ -291,6 +318,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
 

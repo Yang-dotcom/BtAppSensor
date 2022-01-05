@@ -19,6 +19,9 @@ import android.content.Intent;
 import android.view.View;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -29,9 +32,11 @@ import android.os.Handler;
 public class MainActivity extends AppCompatActivity {
     private final UUID PORT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");//Serial Port Service ID
     private BluetoothDevice device;
+    BluetoothAdapter bluetoothAdapter;
     private BluetoothSocket socket;
+    Set<BluetoothDevice> bondedDevices;
     private InputStream inputStream;
-    Button startButton,clearButton,stopButton;
+    Button startButton,clearButton,stopButton, connect;
     TextView textView;
     TableLayout tblLayout;
     EditText refresh_rate;
@@ -54,6 +59,10 @@ public class MainActivity extends AppCompatActivity {
     Timer timer = new Timer();
     // UI button switch;
     Boolean UI_switch = false;
+    // change Device switch
+    Boolean switch_device = true;
+    ArrayList<String> list = new ArrayList();
+    ListView lv;
 
 
     @Override
@@ -66,8 +75,13 @@ public class MainActivity extends AppCompatActivity {
         textView = (TextView) findViewById(R.id.textView);
         tblLayout = (TableLayout) findViewById(R.id.tableLayout);
         refresh_rate = (EditText) findViewById(R.id.refresh_rate);
+        lv = (ListView) findViewById(R.id.listView);
+        connect = (Button) findViewById(R.id.connect);
         setTitle("CTech Reader");
         setUiEnabled(UI_switch);
+
+        //set to connect scren
+        connectScreen();
 
         refresh_rate.setOnEditorActionListener(new TextView.OnEditorActionListener(){
             @Override
@@ -86,6 +100,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3){
+                String selected = list.get(position);
+                for (Iterator<BluetoothDevice> it = bondedDevices.iterator(); it.hasNext();){
+                    BluetoothDevice bt_device = it.next();
+                    if (bt_device.getName().equals(selected)){
+                        device = bluetoothAdapter.getRemoteDevice(String.valueOf(bt_device));
+                        tblScreen();
+                    }
+                }
+            }
+
+        });
     }
 
     @Override
@@ -101,17 +129,18 @@ public class MainActivity extends AppCompatActivity {
 
     // closing operation. ends reader thread; closes inputstream and scoket.
     public void closing() throws InterruptedException {
-        reader.stopThread = true;
-        timer.cancel();
-        try {
-            inputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+
+        if (reader != null && timer != null){
+            reader.stopThread = true;
+            timer.cancel();
         }
-        try {
-            socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (inputStream != null && socket != null){
+            try {
+                inputStream.close();
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         UI_switch = false;
         setUiEnabled(UI_switch);
@@ -131,16 +160,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-/*    refresh_rate.setOnEditorActionListener(new TextView.OnEditorActionListener(){
-        @Override
-        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                System.out.println("working event");
-                return true;
-            }
-            return false;
-        }
-    });*/
+
+    public void OnClickConnect(View view){
+        BTinit();
+    }
 
     /* Initialize a BluetoothDevice class using .getremoteDevice method on bluetoothadapter, which we got through getdefaultadapter method;
         if Bluetooth is not enabled on the android device yet, request permission to enable it and proceed with activation.
@@ -148,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
     public boolean BTinit() {
         boolean found = false;
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
             Toast.makeText(getApplicationContext(), "Device doesnt Support Bluetooth", Toast.LENGTH_SHORT).show();
         }
@@ -161,19 +184,23 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-        Set<BluetoothDevice> bondedDevices = bluetoothAdapter.getBondedDevices();
+        bondedDevices = bluetoothAdapter.getBondedDevices();
         if (bondedDevices.isEmpty()) {
             Toast.makeText(getApplicationContext(), "Please Pair the Device first", Toast.LENGTH_SHORT).show();
-        } else {
-            String device_name = "CTechLogger";
-            for (BluetoothDevice iterator : bondedDevices) {
-                if (iterator.getName().equals(device_name)) {
-                    device = bluetoothAdapter.getRemoteDevice(String.valueOf(iterator));
+        } else  if (switch_device){
+            list.clear();
+            for (BluetoothDevice bt : bondedDevices) list.add(bt.getName());
+            Toast.makeText(getApplicationContext(), "Showing Paired Devices",Toast.LENGTH_SHORT).show();
+            ArrayAdapter adapter = new  ArrayAdapter(this,android.R.layout.simple_list_item_1, list);
+            lv.setAdapter(adapter);
+            found = true;
+            return found;
+        }else{
+            for (BluetoothDevice bt : bondedDevices){
+                if(bt.getName().equals(device.getName())){
                     found = true;
-                    break;
+                    return found;
                 }
-
-
             }
         }
         return found;
@@ -191,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
             connected=false;
-            textView.setText("\nConnection not Opened!\n");
+            textView.setText("\nConnection not Opened!\n" + device);
         }
         if(connected)
         {
@@ -246,8 +273,8 @@ public class MainActivity extends AppCompatActivity {
         // is "$MEA n23" and the first sensor data is thus on the second element onward.
         n_sensors = vet_str_per_sensor.length - 1;
 
-
-        //schedule a TimerTask with tbl_refresh_ms interval to the timer class
+        //create a timer schedule a TimerTask with tbl_refresh_ms interval to the timer class
+        timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -309,11 +336,15 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void onClickStop(View view) throws IOException, InterruptedException {
+        reader.stopThread = true;
+        timer.cancel();
         closing();
     }
 
-    public void onClickClear(View view) {
+    public void onClickClear(View view) throws InterruptedException {
         //clears textView table
+        connectScreen();
+        closing();
         textView.setText("0");
         TableLayout tblLayout = (TableLayout)findViewById(R.id.tableLayout);
         for(int i = 1; i <7; i++){
@@ -325,6 +356,32 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
+    public void tblScreen(){
+        textView.setVisibility(View.VISIBLE);
+        refresh_rate.setVisibility(View.VISIBLE);
+        tblLayout.setVisibility(View.VISIBLE);
+        startButton.setVisibility(View.VISIBLE);
+        stopButton.setVisibility(View.VISIBLE);
+        clearButton.setVisibility(View.VISIBLE);
+        lv.setVisibility(View.INVISIBLE);
+        connect.setVisibility(View.INVISIBLE);
+        switch_device = false;
+    }
+
+    public void connectScreen(){
+        switch_device = true;
+        textView.setVisibility(View.INVISIBLE);
+        refresh_rate.setVisibility(View.INVISIBLE);
+        tblLayout.setVisibility(View.INVISIBLE);
+        stopButton.setVisibility(View.INVISIBLE);
+        clearButton.setVisibility(View.INVISIBLE);
+        startButton.setVisibility(View.INVISIBLE);
+        lv.setVisibility(View.VISIBLE);
+        connect.setVisibility(View.VISIBLE);
+    }
 }
+
+
 
 
