@@ -15,9 +15,8 @@ public class Reader implements Runnable {
     InputStream inputStream;
     private Object InterruptedException;
 
-    public Reader(LinkedBlockingQueue<String> queue1, Boolean stopThread1, InputStream inputStream, BluetoothSocket socket){
+    public Reader(LinkedBlockingQueue<String> queue1, InputStream inputStream, BluetoothSocket socket){
         this.queue = queue1;
-        this.stopThread = stopThread1;
         this.inputStream = inputStream;
         this.socket = socket;
 
@@ -25,12 +24,15 @@ public class Reader implements Runnable {
 
     @Override
     public void run(){
-        // create a BufferedReader that gives us more convenient methods to use onto the imputstream
+        // create a BufferedReader that gives us more convenient methods to use onto the inputstream
         BufferedReader btInputStream = new BufferedReader(new InputStreamReader(inputStream));
+        stopThread = false;
         while(!Thread.currentThread().isInterrupted() && !stopThread){
             try {
                 //check if the inputstream has available data incoming
                 int byteCount = inputStream.available();
+                //check if buffer of inputStream is not too full; then proceed to read a line (till \n)
+                //and put it on the blockingqueue shared with main
                 if(byteCount>0 && byteCount<2000){
                     String string = btInputStream.readLine();
                     boolean isFound = string.contains("$MEA") != string.contains("ERR"); //&& !string.contains("ERR");
@@ -43,19 +45,19 @@ public class Reader implements Runnable {
                     }else {
                         System.out.println("thread1 not working"+ byteCount);
                     }
-            }else if (byteCount > 2000) {
+            }// If buffer is too full, "eat" further incoming data in line - chunks to avoid EOF due to size of buffer too large
+                else if (byteCount > 2000) {
                     btInputStream.readLine();
             }
-                /*try {
-                    //close inputstream and btsocket
-                    inputStream.close();
-                    socket.close();
-                } catch (IOException i) {
-                    i.printStackTrace();
-                }*/
         } catch (java.lang.InterruptedException | IOException e) {
                 e.printStackTrace();
                 stopThread =true;
+                try {
+                    socket.close();
+                    inputStream.close();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
             }
         }
 
