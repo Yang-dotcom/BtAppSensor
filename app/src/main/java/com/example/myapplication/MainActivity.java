@@ -36,11 +36,12 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothSocket socket;
     Set<BluetoothDevice> bondedDevices;
     private InputStream inputStream;
-    Button startButton,clearButton,stopButton, connect;
+    Button startButton,clearButton,stopButton, connect, changedDevice;
     TextView textView, force_value;
     TableLayout tblLayout;
     EditText refresh_rate;
     boolean deviceConnected=false;
+    boolean reset0values= true;
     public Reader reader;
     ProcessedInput processedInput;
     String valuestr;
@@ -79,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
         lv = (ListView) findViewById(R.id.listView);
         connect = (Button) findViewById(R.id.connect);
         force_value = (TextView) findViewById(R.id.force_value);
+        changedDevice = (Button) findViewById(R.id.change_device);
         setTitle("CTech Reader");
         setUiEnabled(UI_switch);
 
@@ -185,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void OnClickConnect(View view){
+    public void onClickConnect(View view){
         BTinit();
     }
 
@@ -285,13 +287,15 @@ public class MainActivity extends AppCompatActivity {
         //the first element of the array after the split
         // is "$MEA n23" and the first sensor data is thus on the second element onward.
         n_sensors = vet_str_per_sensor.length - 1;
-        processedInput = new ProcessedInput(n_sensors, valuestr, p0, t0);
-        processedInput.run();
+        if (reset0values){
+            processedInput = new ProcessedInput(n_sensors, valuestr, p0, t0);
+            processedInput.run();
 
-        t0 = processedInput.temp.clone();
-        p0 = processedInput.pressure.clone();
+            t0 = processedInput.temp.clone();
+            p0 = processedInput.pressure.clone();
 
-
+            reset0values = false;
+        }
     }
 
     void beginListenForData()
@@ -381,19 +385,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickClear(View view) throws InterruptedException {
-        //clears textView table
-        connectScreen();
-        closing();
-        textView.setText("0");
-        TableLayout tblLayout = (TableLayout)findViewById(R.id.tableLayout);
+        reset0values = true;
+        /*TableLayout tblLayout = (TableLayout)findViewById(R.id.tableLayout);
         for(int i = 1; i <7; i++){
             TableRow row = (TableRow)tblLayout.getChildAt(i);
             for (int j=0; j<3; j++){
                 TextView txt = (TextView)row.getChildAt(j);
                 txt.setText("0");
             }
-        }
+        }*/
 
+    }
+
+    public void onClickChangeDevice(View view) throws InterruptedException {
+        connectScreen();
+        closing();
     }
 
     public void tblScreen(){
@@ -403,6 +409,7 @@ public class MainActivity extends AppCompatActivity {
         startButton.setVisibility(View.VISIBLE);
         stopButton.setVisibility(View.VISIBLE);
         clearButton.setVisibility(View.VISIBLE);
+        changedDevice.setVisibility(View.VISIBLE);
         lv.setVisibility(View.INVISIBLE);
         connect.setVisibility(View.INVISIBLE);
         switch_device = false;
@@ -413,6 +420,7 @@ public class MainActivity extends AppCompatActivity {
         textView.setVisibility(View.INVISIBLE);
         refresh_rate.setVisibility(View.INVISIBLE);
         tblLayout.setVisibility(View.INVISIBLE);
+        changedDevice.setVisibility(View.INVISIBLE);
         stopButton.setVisibility(View.INVISIBLE);
         clearButton.setVisibility(View.INVISIBLE);
         startButton.setVisibility(View.INVISIBLE);

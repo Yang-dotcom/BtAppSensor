@@ -17,10 +17,23 @@
         tools:context=".MainActivity">
 
         <Button
+            android:id="@+id/change_device"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="32dp"
+            android:text="Change Device"
+            android:onClick="onClickChangeDevice"
+            android:textSize="8sp"
+            app:iconPadding="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
             android:id="@+id/connect"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="OnClickConnect"
+            android:onClick="onClickConnect"
             android:text="CONNECT"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -39,7 +52,9 @@
             <ListView
                 android:id="@+id/listView"
                 android:layout_width="match_parent"
-                android:layout_height="400dp" />
+                android:layout_height="400dp" >
+
+            </ListView>
         </LinearLayout>
 
         <EditText
@@ -56,7 +71,7 @@
             android:singleLine="true"
             android:text="Table Refresh Rate (ms)"
             android:textSize="8sp"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/change_device"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -376,9 +391,9 @@
                 android:background="#009688"
                 android:backgroundTint="#009688"
                 android:fontFamily="sans-serif"
-                android:includeFontPadding="true"
+                android:includeFontPadding="false"
                 android:onClick="onClickClear"
-                android:text="BACK"
+                android:text=" RESET P0,T0"
                 android:textColor="#F3F1F1" />
         </TableRow>
 
