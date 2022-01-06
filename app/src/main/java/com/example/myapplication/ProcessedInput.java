@@ -4,21 +4,27 @@ package com.example.myapplication;
 import java.util.Arrays;
 
 public class ProcessedInput {
+    private final Float[] p0, t0;
     Integer n;
     Integer[] sensor_ID;
     String str;
     String[] vet_sensors; //size is n+1
     String[] single_sensor_data; //size of each row is n, each cell having 3 elements [sensor, T, P]
-    Float[] temp, pressure;
+    Float[] temp, pressure, force;
+    Float weightedForce;
+    Integer fatt_conversione = 2, sez_forzata_A = 256, fatt_influenza = 300;
 
 
-    public ProcessedInput(Integer n, String str){
+    public ProcessedInput(Integer n, String str, Float[] p0, Float[] t0){
+        this.p0 = p0;
+        this.t0 = t0;
         this.n = n;
         this.str = str;
     }
 
     // str to process: "$MEA	m5833	s37	P996.5796	T24.5816	s38	P996.4803	T24.6520	s39	P996.5444	T24.8601	s40	P996.4953	T24.4348	s41	P996.5275	T24.7779	s42	P996.2718	T24.6095"
     public void run(){
+        weightedForce = 0.0f;
         // example vet_sensors = ["$MEA	m5833	", "37	P996.5796	T24.5816	", "38	P996.4803	T24.6520	", "39	P996.5444	T24.8601	", "40	P996.4953	T24.4348	","41	P996.5275	T24.7779	", "42	P996.2718	T24.6095"]
         vet_sensors = str.split("s");
         temp = new Float[n];
@@ -31,7 +37,11 @@ public class ProcessedInput {
             sensor_ID[i] = Integer.parseInt(single_sensor_data[0]);
             pressure[i] = Float.parseFloat(single_sensor_data[1].substring(1));
             temp[i] = Float.parseFloat(single_sensor_data[2].substring(1));
+            force[i] = (pressure[i] - p0[i])* fatt_conversione * sez_forzata_A * (temp[i] -t0[i]) * fatt_influenza;
+            weightedForce += force[i];
         }
+
+        weightedForce /= n;
 
         /*System.out.println("sensor"+Arrays.toString(sensor_ID));
         System.out.println("press"+Arrays.toString(pressure));

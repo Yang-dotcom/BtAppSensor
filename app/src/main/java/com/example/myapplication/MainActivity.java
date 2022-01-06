@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     Set<BluetoothDevice> bondedDevices;
     private InputStream inputStream;
     Button startButton,clearButton,stopButton, connect;
-    TextView textView;
+    TextView textView, force_value;
     TableLayout tblLayout;
     EditText refresh_rate;
     boolean deviceConnected=false;
@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     Boolean switch_device = true;
     ArrayList<String> list = new ArrayList();
     ListView lv;
+    Float[] t0, p0;
 
 
     @Override
@@ -77,9 +78,13 @@ public class MainActivity extends AppCompatActivity {
         refresh_rate = (EditText) findViewById(R.id.refresh_rate);
         lv = (ListView) findViewById(R.id.listView);
         connect = (Button) findViewById(R.id.connect);
+        force_value = (TextView) findViewById(R.id.force_value);
         setTitle("CTech Reader");
         setUiEnabled(UI_switch);
 
+
+        //crash handling
+        appInitialization();
         //set to connect scren
         connectScreen();
 
@@ -184,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
         BTinit();
     }
 
+    //TODO: update comment
     /* Initialize a BluetoothDevice class using .getremoteDevice method on bluetoothadapter, which we got through getdefaultadapter method;
         if Bluetooth is not enabled on the android device yet, request permission to enable it and proceed with activation.
         return true if the BluetoothDevice with name "CTechLogger" is found in the list of previously connected devices, otherwise return false*/
@@ -237,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
             connected=false;
-            textView.setText("\nConnection not Opened!\n" + device);
+            textView.setText("\nConnection not Opened!\n");
         }
         if(connected)
         {
@@ -268,6 +274,26 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    void initializationStep(){
+        //Initialization step (first reading is lost)
+        try {
+            valuestr = queue.take();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        String[] vet_str_per_sensor = valuestr.split("s");
+        //the first element of the array after the split
+        // is "$MEA n23" and the first sensor data is thus on the second element onward.
+        n_sensors = vet_str_per_sensor.length - 1;
+        processedInput = new ProcessedInput(n_sensors, valuestr, p0, t0);
+        processedInput.run();
+
+        t0 = processedInput.temp.clone();
+        p0 = processedInput.pressure.clone();
+
+
+    }
+
     void beginListenForData()
     {
 
@@ -281,16 +307,7 @@ public class MainActivity extends AppCompatActivity {
         new Thread(reader).start();
 
 
-        //Initialization step (first reading is lost)
-        try {
-            valuestr = queue.take();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        String[] vet_str_per_sensor = valuestr.split("s");
-        //the first element of the array after the split
-        // is "$MEA n23" and the first sensor data is thus on the second element onward.
-        n_sensors = vet_str_per_sensor.length - 1;
+        initializationStep();
 
         //create a timer schedule a TimerTask with tbl_refresh_ms interval to the timer class
         timer = new Timer();
@@ -312,7 +329,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             //Create instance of ProcessedInput given an instance of valuestr
-            processedInput = new ProcessedInput(n_sensors, valuestr);
+            processedInput = new ProcessedInput(n_sensors, valuestr, p0, t0);
             processedInput.run();
             TableLayout tblLayout = (TableLayout) findViewById(R.id.tableLayout);
             textView.setText("Measurement n. "+String.valueOf(k));
@@ -334,7 +351,10 @@ public class MainActivity extends AppCompatActivity {
                 // display temp of i-th sensor on cell[i][2]
                 TextView temp = (TextView) row.getChildAt(2);
                 temp.setText((processedInput.temp[i]).toString());
+
             }
+
+            force_value.setText((processedInput.weightedForce).toString());
         }
     };
 
