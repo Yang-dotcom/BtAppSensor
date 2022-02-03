@@ -4,18 +4,19 @@ package com.example.myapplication;
 import java.util.Arrays;
 
 public class ProcessedInput {
-    private final Float[] p0, t0;
+    private final float[] p0;
+    private final float[] t0;
     Integer n;
     Integer[] sensor_ID;
     String str;
     String[] vet_sensors; //size is n+1
     String[] single_sensor_data; //size of each row is n, each cell having 3 elements [sensor, T, P]
-    Float[] temp, pressure, force;
-    Float weightedForce;
+    float[] temp, pressure, force;
+    float weightedForce;
     Integer fatt_conversione = 2, sez_forzata_A = 256, fatt_influenza = 300;
 
 
-    public ProcessedInput(Integer n, String str, Float[] p0, Float[] t0){
+    public ProcessedInput(Integer n, String str, float[] p0, float[] t0){
         this.p0 = p0;
         this.t0 = t0;
         this.n = n;
@@ -27,8 +28,9 @@ public class ProcessedInput {
         weightedForce = 0.0f;
         // example vet_sensors = ["$MEA	m5833	", "37	P996.5796	T24.5816	", "38	P996.4803	T24.6520	", "39	P996.5444	T24.8601	", "40	P996.4953	T24.4348	","41	P996.5275	T24.7779	", "42	P996.2718	T24.6095"]
         vet_sensors = str.split("s");
-        temp = new Float[n];
-        pressure = new Float[n];
+        temp = new float[n];
+        pressure = new float[n];
+        force = new float[n];
         sensor_ID = new Integer[n];
         for (int i=0; i<n; i++){
             //single_sensor_data = ["37", "P996.5796", "T24.5816"] example

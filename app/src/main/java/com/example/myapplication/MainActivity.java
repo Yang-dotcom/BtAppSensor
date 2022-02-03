@@ -20,6 +20,7 @@ import android.view.View;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -64,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
     Boolean switch_device = true;
     ArrayList<String> list = new ArrayList();
     ListView lv;
-    Float[] t0, p0;
+    float[] t0, p0;
 
 
     @Override
@@ -288,12 +289,18 @@ public class MainActivity extends AppCompatActivity {
         // is "$MEA n23" and the first sensor data is thus on the second element onward.
         n_sensors = vet_str_per_sensor.length - 1;
         if (reset0values){
+            p0 = new float[6];
+            t0 = new float[6];
+            System.out.println(Arrays.toString(p0));
+            System.out.println(Arrays.toString(t0));
             processedInput = new ProcessedInput(n_sensors, valuestr, p0, t0);
             processedInput.run();
-
+            System.out.println(Arrays.toString(processedInput.temp));
+            System.out.println(Arrays.toString(processedInput.pressure));
             t0 = processedInput.temp.clone();
             p0 = processedInput.pressure.clone();
-
+            System.out.println(Arrays.toString(p0));
+            System.out.println(Arrays.toString(t0));
             reset0values = false;
         }
     }
@@ -350,15 +357,15 @@ public class MainActivity extends AppCompatActivity {
 
                 // display pressure of i-th sensor on cell[i][1]
                 TextView pressure = (TextView) row.getChildAt(1);
-                pressure.setText((processedInput.pressure[i]).toString());
+                pressure.setText(Float.toString(processedInput.pressure[i]));
 
                 // display temp of i-th sensor on cell[i][2]
                 TextView temp = (TextView) row.getChildAt(2);
-                temp.setText((processedInput.temp[i]).toString());
+                temp.setText(Float.toString(processedInput.temp[i]));
 
             }
 
-            force_value.setText((processedInput.weightedForce).toString());
+            force_value.setText(Float.toString(processedInput.weightedForce));
         }
     };
 
@@ -367,7 +374,8 @@ public class MainActivity extends AppCompatActivity {
     private void UpdateGUI() throws InterruptedException {
         try {
             valuestr = queue.take();
-            System.out.println(valuestr);
+            System.out.println(Arrays.toString(p0) + Arrays.toString(t0));
+            //System.out.println(valuestr);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

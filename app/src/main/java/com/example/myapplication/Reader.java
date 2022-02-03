@@ -41,9 +41,9 @@ public class Reader implements Runnable {
                         //a blockingqueue is an array that is shared between threads
                         //if the blockingqueue is at full capacity, the put operation is blocked and a slot is freed
                         queue.put(string);
-                        System.out.println("thread1 working" + byteCount);
+                        //System.out.println("thread1 working" + byteCount);
                     }else {
-                        System.out.println("thread1 not working"+ byteCount);
+                        //System.out.println("thread1 not working"+ byteCount);
                     }
             }// If buffer is too full, "eat" further incoming data in line - chunks to avoid EOF due to size of buffer too large
                 else if (byteCount > 2000) {
