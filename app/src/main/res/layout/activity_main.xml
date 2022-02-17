@@ -17,12 +17,12 @@
         tools:context=".MainActivity">
 
         <Button
+            android:background="@drawable/black_outline_style"
             android:id="@+id/change_device"
             android:layout_width="88dp"
             android:layout_height="35dp"
             android:layout_marginTop="15dp"
             android:layout_marginEnd="32dp"
-            android:background="#009688"
             android:backgroundTint="#960000"
             android:onClick="onClickChangeDevice"
             android:text="Change Device"
@@ -33,14 +33,14 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:textColor="#F3F1F1"
-            android:background="#009688"
-            android:backgroundTint="#960000"
             android:id="@+id/connect"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/black_outline_style"
+            android:backgroundTint="#960000"
             android:onClick="onClickConnect"
             android:text="CONNECT"
+            android:textColor="#F3F1F1"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -64,19 +64,20 @@
         </LinearLayout>
 
         <EditText
-
             android:id="@+id/refresh_rate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
+            android:background="@drawable/black_outline_style"
             android:ems="10"
             android:focusableInTouchMode="true"
             android:imeOptions="actionDone"
             android:inputType="text"
             android:minHeight="30dp"
             android:singleLine="true"
-            android:text="Table Refresh Rate (ms)"
-            android:textSize="8sp"
+            android:text=" Table Refresh Rate (ms)"
+            android:textAlignment="center"
+            android:textSize="14sp"
             app:layout_constraintEnd_toStartOf="@+id/change_device"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -95,10 +96,10 @@
                 android:layout_height="match_parent">
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/textView21"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="#5D8585"
                     android:backgroundTint="#101716"
                     android:fontFamily="sans-serif"
                     android:gravity="center"
@@ -108,10 +109,10 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/textView22"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="#5D8585"
                     android:backgroundTint="#111313"
                     android:fontFamily="sans-serif"
                     android:gravity="center"
@@ -121,10 +122,10 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/textView18"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="#5D8585"
                     android:backgroundTint="#080B0A"
                     android:fontFamily="sans-serif"
                     android:gravity="center"
@@ -139,6 +140,7 @@
                 android:layout_height="match_parent">
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/textView16"
                     android:layout_width="29dp"
                     android:layout_height="wrap_content"
@@ -147,6 +149,7 @@
                     android:textAlignment="center" />
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/textView15"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -155,6 +158,7 @@
                     android:textAlignment="center" />
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/textView14"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -168,6 +172,7 @@
                 android:layout_height="wrap_content">
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/textView13"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -176,6 +181,7 @@
                     android:textAlignment="center" />
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/textView12"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -184,6 +190,7 @@
                     android:textAlignment="center" />
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/textView11"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -197,6 +204,7 @@
                 android:layout_height="wrap_content">
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/textView10"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -205,6 +213,7 @@
                     android:textAlignment="center" />
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/textView9"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -213,6 +222,7 @@
                     android:textAlignment="center" />
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/temp"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -226,6 +236,7 @@
                 android:layout_height="wrap_content">
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/textView7"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -235,6 +246,7 @@
 
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/textView6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -243,6 +255,7 @@
                     android:textAlignment="center" />
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/textView5"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -256,6 +269,7 @@
                 android:layout_height="wrap_content">
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/textView2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -264,6 +278,7 @@
                     android:textAlignment="center" />
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/address"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -272,6 +287,7 @@
                     android:textAlignment="center" />
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/pressure"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -286,6 +302,7 @@
                 android:layout_height="wrap_content">
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/textView4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -294,6 +311,7 @@
                     android:textAlignment="center" />
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/textView3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -302,6 +320,7 @@
                     android:textAlignment="center" />
 
                 <TextView
+                    android:background="@drawable/black_outline_style"
                     android:id="@+id/textView8"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -323,6 +342,7 @@
             app:layout_constraintTop_toBottomOf="@+id/tableLayout">
 
             <TextView
+                android:background="@drawable/black_outline_style"
                 android:id="@+id/force"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -332,6 +352,7 @@
                 android:textAlignment="center" />
 
             <TextView
+                android:background="@drawable/black_outline_style"
                 android:id="@+id/force_value"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -356,10 +377,10 @@
             app:layout_constraintTop_toBottomOf="@+id/tableRow2">
 
             <Button
+                android:background="@drawable/black_outline_style"
                 android:id="@+id/buttonStop"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="#009688"
                 android:backgroundTint="#960000"
                 android:fontFamily="sans-serif"
                 android:includeFontPadding="false"
@@ -373,8 +394,8 @@
                 android:id="@+id/buttonStart"
                 android:layout_width="132dp"
                 android:layout_height="wrap_content"
-                android:background="#009688"
                 android:backgroundTint="#960000"
+                android:background="@drawable/black_outline_style"
                 android:fontFamily="sans-serif"
                 android:onClick="onClickStart"
                 android:text="start"
@@ -384,12 +405,12 @@
                 android:id="@+id/buttonClear"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="#009688"
                 android:backgroundTint="#960000"
                 android:fontFamily="sans-serif"
                 android:includeFontPadding="false"
                 android:onClick="onClickClear"
                 android:text=" RESET P0,T0"
+                android:background="@drawable/black_outline_style"
                 android:textColor="#F3F1F1" />
         </TableRow>
 
@@ -397,11 +418,14 @@
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="10dp"
+            android:background="@drawable/black_outline_style"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/connect" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
