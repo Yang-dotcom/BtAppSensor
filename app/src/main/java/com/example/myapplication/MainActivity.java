@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.view.View;
 
 import java.io.*;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -38,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     Set<BluetoothDevice> bondedDevices;
     private InputStream inputStream;
     Button startButton,clearButton,stopButton, connect, changedDevice;
-    TextView textView, force_value;
+    TextView textView, force_value, force;
     TableLayout tblLayout;
     EditText refresh_rate;
     boolean deviceConnected=false;
@@ -80,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
         refresh_rate = (EditText) findViewById(R.id.refresh_rate);
         lv = (ListView) findViewById(R.id.listView);
         connect = (Button) findViewById(R.id.connect);
+        force = (TextView) findViewById(R.id.force);
         force_value = (TextView) findViewById(R.id.force_value);
         changedDevice = (Button) findViewById(R.id.change_device);
         setTitle("CTech Reader");
@@ -339,6 +341,7 @@ public class MainActivity extends AppCompatActivity {
         @SuppressLint("SetTextI18n")
         @Override
         public void run() {
+            DecimalFormat df = new DecimalFormat("0.00");
             //Create instance of ProcessedInput given an instance of valuestr
             processedInput = new ProcessedInput(n_sensors, valuestr, p0, t0);
             processedInput.run();
@@ -357,15 +360,19 @@ public class MainActivity extends AppCompatActivity {
 
                 // display pressure of i-th sensor on cell[i][1]
                 TextView pressure = (TextView) row.getChildAt(1);
-                pressure.setText(Float.toString(processedInput.pressure[i]));
+                @SuppressLint("DefaultLocale") String rounded = String.format("%.0f", processedInput.pressure[i]);
+                pressure.setText(rounded);
 
                 // display temp of i-th sensor on cell[i][2]
                 TextView temp = (TextView) row.getChildAt(2);
-                temp.setText(Float.toString(processedInput.temp[i]));
+                float t1 = processedInput.temp[i];
+                t1 = Float.parseFloat(df.format(t1));
+                temp.setText(Float.toString(t1));
 
             }
-
-            force_value.setText(Float.toString(processedInput.weightedForce));
+            float f1 = processedInput.weightedForce;
+            f1 = Float.parseFloat(df.format(f1));
+            force_value.setText(Float.toString(f1));
         }
     };
 
@@ -411,6 +418,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void tblScreen(){
+        force_value.setVisibility(View.VISIBLE);
+        force.setVisibility(View.VISIBLE);
         textView.setVisibility(View.VISIBLE);
         refresh_rate.setVisibility(View.VISIBLE);
         tblLayout.setVisibility(View.VISIBLE);
@@ -425,6 +434,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void connectScreen(){
         switch_device = true;
+        force_value.setVisibility(View.INVISIBLE);
+        force.setVisibility(View.INVISIBLE);
         textView.setVisibility(View.INVISIBLE);
         refresh_rate.setVisibility(View.INVISIBLE);
         tblLayout.setVisibility(View.INVISIBLE);

@@ -37,7 +37,7 @@ public class ProcessedInput {
             single_sensor_data = vet_sensors[i+1].split("\t");
             //System.out.println(i+"  Thread 3: "+ Arrays.toString(single_sensor_data)+ Arrays.toString(vet_sensors));
             sensor_ID[i] = Integer.parseInt(single_sensor_data[0]);
-            pressure[i] = Float.parseFloat(single_sensor_data[1].substring(1));
+            pressure[i] = Float.parseFloat(single_sensor_data[1].substring(1))*100;
             temp[i] = Float.parseFloat(single_sensor_data[2].substring(1));
             force[i] = (pressure[i] - p0[i])* fatt_conversione * sez_forzata_A * (temp[i] -t0[i]) * fatt_influenza;
             weightedForce += force[i];

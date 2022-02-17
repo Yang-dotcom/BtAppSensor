@@ -17,6 +17,9 @@
         tools:context=".MainActivity">
 
         <Button
+            android:textColor="#F3F1F1"
+            android:background="#009688"
+            android:backgroundTint="#960000"
             android:id="@+id/change_device"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
@@ -30,6 +33,9 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
+            android:textColor="#F3F1F1"
+            android:background="#009688"
+            android:backgroundTint="#960000"
             android:id="@+id/connect"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -92,8 +98,8 @@
                     android:id="@+id/textView21"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="#009688"
-                    android:backgroundTint="#009688"
+                    android:background="#5D8585"
+                    android:backgroundTint="#101716"
                     android:fontFamily="sans-serif"
                     android:gravity="center"
                     android:text="Sensor"
@@ -105,12 +111,12 @@
                     android:id="@+id/textView22"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="#009688"
-                    android:backgroundTint="#009688"
+                    android:background="#5D8585"
+                    android:backgroundTint="#111313"
                     android:fontFamily="sans-serif"
                     android:gravity="center"
-                    android:textAlignment="center"
                     android:text="Pressure [Pa]"
+                    android:textAlignment="center"
                     android:textColor="#F8F0F0"
                     android:textStyle="bold" />
 
@@ -118,12 +124,12 @@
                     android:id="@+id/textView18"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="#009688"
-                    android:backgroundTint="#009688"
+                    android:background="#5D8585"
+                    android:backgroundTint="#080B0A"
                     android:fontFamily="sans-serif"
-                    android:textAlignment="center"
                     android:gravity="center"
                     android:text="Temperature [°C]"
+                    android:textAlignment="center"
                     android:textColor="#F1EDED"
                     android:textStyle="bold" />
             </TableRow>
@@ -352,7 +358,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="100dp"
-            android:background="#FFFFFF"
             android:padding="0dp"
             app:layout_constraintBottom_toTopOf="@+id/textView"
             app:layout_constraintEnd_toEndOf="parent"
@@ -364,7 +369,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="#009688"
-                android:backgroundTint="#009688"
+                android:backgroundTint="#960000"
                 android:fontFamily="sans-serif"
                 android:includeFontPadding="false"
                 android:onClick="onClickStop"
@@ -372,24 +377,24 @@
                 android:text="STOP"
                 android:textColor="#F3F1F1" />
 
+
             <Button
                 android:id="@+id/buttonStart"
                 android:layout_width="132dp"
                 android:layout_height="wrap_content"
                 android:background="#009688"
-                android:backgroundTint="#009688"
+                android:backgroundTint="#960000"
                 android:fontFamily="sans-serif"
                 android:onClick="onClickStart"
                 android:text="start"
                 android:textColor="#F3F1F1" />
-
 
             <Button
                 android:id="@+id/buttonClear"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="#009688"
-                android:backgroundTint="#009688"
+                android:backgroundTint="#960000"
                 android:fontFamily="sans-serif"
                 android:includeFontPadding="false"
                 android:onClick="onClickClear"
