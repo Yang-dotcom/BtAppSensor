@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
         //crash handling
         appInitialization();
-        //set to connect scren
+        //set to connect screen
         connectScreen();
 
         refresh_rate.setOnEditorActionListener(new TextView.OnEditorActionListener(){
@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    // device orientation changing handling
+    // handling of device orientantion change
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         try {
@@ -194,10 +194,9 @@ public class MainActivity extends AppCompatActivity {
         BTinit();
     }
 
-    //TODO: update comment
     /* Initialize a BluetoothDevice class using .getremoteDevice method on bluetoothadapter, which we got through getdefaultadapter method;
         if Bluetooth is not enabled on the android device yet, request permission to enable it and proceed with activation.
-        return true if the BluetoothDevice with name "CTechLogger" is found in the list of previously connected devices, otherwise return false*/
+        return true if the BluetoothDevice has successfully paired with the selected bluetooth device*/
     @SuppressLint("SetTextI18n")
     public boolean BTinit() {
         boolean found = false;
@@ -218,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
         if (bondedDevices.isEmpty()) {
             Toast.makeText(getApplicationContext(), "Please Pair the Device first", Toast.LENGTH_SHORT).show();
         } else  if (switch_device){
+            // if switch_device == true, it will display a refreshed list of available bluetooth devices
             list.clear();
             for (BluetoothDevice bt : bondedDevices) list.add(bt.getName());
             Toast.makeText(getApplicationContext(), "Showing Paired Devices",Toast.LENGTH_SHORT).show();
