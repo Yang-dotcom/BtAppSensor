@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         setTitle("CTech Reader");
         setUiEnabled(UI_switch);
 
-
+        //update 2
         //crash handling
         appInitialization();
         //set to connect screen
