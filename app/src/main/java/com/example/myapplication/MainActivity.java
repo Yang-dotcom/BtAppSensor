@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     Button startButton,clearButton,stopButton, connect, changedDevice;
     TextView textView, force_value, force;
     TableLayout tblLayout;
+    //update 1
     EditText refresh_rate;
     boolean deviceConnected=false;
     boolean reset0values= true;
