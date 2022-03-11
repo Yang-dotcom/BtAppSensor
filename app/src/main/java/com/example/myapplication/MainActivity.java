@@ -1,12 +1,15 @@
 package com.example.myapplication;
 
 
+import android.Manifest;
+import android.os.Build;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.widget.*;
 import android.content.res.Configuration;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -30,6 +33,9 @@ import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 import android.os.Handler;
+
+import com.gun0912.tedpermission.PermissionListener;
+import com.gun0912.tedpermission.normal.TedPermission;
 
 public class MainActivity extends AppCompatActivity {
     private final UUID PORT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");//Serial Port Service ID
@@ -126,6 +132,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
+
     @Override
     // handling of device orientantion change
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
@@ -190,8 +198,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.S)
     public void onClickConnect(View view){
+        check_permission();
         BTinit();
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    public void check_permission(){
+        //ask for permission
+        PermissionListener permissionlistener = new PermissionListener() {
+            @Override
+            public void onPermissionGranted() {
+                Toast.makeText(MainActivity.this, "Permission Granted", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onPermissionDenied(List<String> deniedPermissions) {
+                Toast.makeText(MainActivity.this, "Permission Denied\n" + deniedPermissions.toString(), Toast.LENGTH_SHORT).show();
+            }
+
+
+        };
+
+        TedPermission.create()
+                .setPermissionListener(permissionlistener)
+                .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
+                .setPermissions(Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+                .check();
     }
 
     /* Initialize a BluetoothDevice class using .getremoteDevice method on bluetoothadapter, which we got through getdefaultadapter method;
