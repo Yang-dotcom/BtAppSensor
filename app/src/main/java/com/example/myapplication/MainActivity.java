@@ -200,13 +200,15 @@ public class MainActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.S)
     public void onClickConnect(View view){
-        check_permission();
+        if(Build.VERSION.SDK_INT > 30){
+            check_permission_12();
+        } else {check_permission_11();}
+
         BTinit();
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.S)
-    public void check_permission(){
+    public void check_permission_11(){
         //ask for permission
         PermissionListener permissionlistener = new PermissionListener() {
             @Override
@@ -219,7 +221,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Permission Denied\n" + deniedPermissions.toString(), Toast.LENGTH_SHORT).show();
             }
 
-
         };
 
         TedPermission.create()
@@ -227,6 +228,32 @@ public class MainActivity extends AppCompatActivity {
                 .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
                 .setPermissions(Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
                 .check();
+
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    public void check_permission_12(){
+        //ask for permission
+        PermissionListener permissionlistener = new PermissionListener() {
+            @Override
+            public void onPermissionGranted() {
+                Toast.makeText(MainActivity.this, "Permission Granted", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onPermissionDenied(List<String> deniedPermissions) {
+                Toast.makeText(MainActivity.this, "Permission Denied\n" + deniedPermissions.toString(), Toast.LENGTH_SHORT).show();
+            }
+
+        };
+
+        TedPermission.create()
+                .setPermissionListener(permissionlistener)
+                .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
+                .setPermissions(Manifest.permission.BLUETOOTH_CONNECT)
+                .check();
+
     }
 
     /* Initialize a BluetoothDevice class using .getremoteDevice method on bluetoothadapter, which we got through getdefaultadapter method;
@@ -328,18 +355,20 @@ public class MainActivity extends AppCompatActivity {
         if (reset0values){
             p0 = new float[6];
             t0 = new float[6];
-            System.out.println(Arrays.toString(p0));
-            System.out.println(Arrays.toString(t0));
+            //System.out.println(Arrays.toString(p0));
+            //System.out.println(Arrays.toString(t0));
             processedInput = new ProcessedInput(n_sensors, valuestr, p0, t0);
             processedInput.run();
-            System.out.println(Arrays.toString(processedInput.temp));
-            System.out.println(Arrays.toString(processedInput.pressure));
+            //System.out.println(Arrays.toString(processedInput.temp));
+            //System.out.println(Arrays.toString(processedInput.pressure));
             t0 = processedInput.temp.clone();
             p0 = processedInput.pressure.clone();
-            System.out.println(Arrays.toString(p0));
-            System.out.println(Arrays.toString(t0));
+            //System.out.println(Arrays.toString(p0));
+            //System.out.println(Arrays.toString(t0));
             reset0values = false;
         }
+        processedInput = new ProcessedInput(n_sensors, valuestr, p0, t0);
+        processedInput.run();
     }
 
     void beginListenForData()
@@ -350,7 +379,7 @@ public class MainActivity extends AppCompatActivity {
         // a share BlockingQueue queue is utilized for both threads as to maintain thread-safety
         //reader thread listens to the logger, receives data as a single line (till \n) and puts a string in a blockingqueue
         //Timer thread processes one string at a time from the blockingqueue and displays them out on UI
-
+        System.out.println("listen working");
         reader = new Reader(queue, inputStream, socket);
         new Thread(reader).start();
 
@@ -400,14 +429,15 @@ public class MainActivity extends AppCompatActivity {
 
                 // display temp of i-th sensor on cell[i][2]
                 TextView temp = (TextView) row.getChildAt(2);
-                float t1 = processedInput.temp[i];
-                t1 = Float.parseFloat(df.format(t1));
-                temp.setText(Float.toString(t1));
+                //float t1 = processedInput.temp[i];
+                //t1 = Float.parseFloat(df.format(t1));
+                temp.setText(Float.toString(processedInput.temp[i]));
+
 
             }
-            float f1 = processedInput.weightedForce;
-            f1 = Float.parseFloat(df.format(f1));
-            force_value.setText(Float.toString(f1));
+            //float f1 = processedInput.weightedForce;
+            //f1 = Float.parseFloat(df.format(f1));
+            force_value.setText(Float.toString(processedInput.weightedForce));
         }
     };
 
