@@ -456,20 +456,18 @@ public class MainActivity extends AppCompatActivity {
 
                 // display pressure of i-th sensor on cell[i][1]
                 TextView pressure = (TextView) row.getChildAt(1);
-                //@SuppressLint("DefaultLocale") String rounded = String.format("%.0f", processedInput.pressure[i]);
-                pressure.setText(String.valueOf(p_averaged[i]));
+                @SuppressLint("DefaultLocale") String p_rounded = String.format("%.0f", p_averaged[i]);
+                pressure.setText(p_rounded);
 
                 // display temp of i-th sensor on cell[i][2]
                 TextView temp = (TextView) row.getChildAt(2);
-                //float t1 = t_averaged[i];
-                //t1 = Float.parseFloat(df.format(t1));
-                temp.setText(String.valueOf(t_averaged[i]));
+                @SuppressLint("DefaultLocale") String t_rounded = String.format("%.2f", t_averaged[i]);
+                temp.setText(t_rounded);6y
 
 
             }
-            //float f1 = processedInput.weightedForce;
-            //f1 = Float.parseFloat(df.format(f1));
-            force_value.setText(Float.toString(f_averaged));
+            @SuppressLint("DefaultLocale") String f_rounded = String.format("%.2f", f_averaged);
+            force_value.setText(f_rounded);
         }
     };
 
