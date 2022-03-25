@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import android.os.Handler;
 
@@ -73,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> list = new ArrayList();
     ListView lv;
     float[] t0, p0;
+    int smoothing_factor = 5;
+    ArrayBlockingQueue<float[]> t_smooth, p_smooth;
 
 
     @Override
@@ -367,8 +370,15 @@ public class MainActivity extends AppCompatActivity {
             //System.out.println(Arrays.toString(t0));
             reset0values = false;
         }
-        processedInput = new ProcessedInput(n_sensors, valuestr, p0, t0);
-        processedInput.run();
+        t_smooth = new ArrayBlockingQueue<float[]>(smoothing_factor);
+        p_smooth = new ArrayBlockingQueue<float[]>(smoothing_factor);
+        for (int i = 0; i < smoothing_factor; i++){
+            processedInput = new ProcessedInput(n_sensors, valuestr, p0, t0);
+            processedInput.run();
+            // clone values of all sensors from a single reading into the i-th reading
+            t_smooth.add(processedInput.temp);
+            p_smooth.add(processedInput.pressure);
+        }
     }
 
     void beginListenForData()
@@ -412,6 +422,26 @@ public class MainActivity extends AppCompatActivity {
             TableLayout tblLayout = (TableLayout) findViewById(R.id.tableLayout);
             textView.setText("Measurement n. "+String.valueOf(k));
 
+            float[] t_current = processedInput.temp.clone();
+            float[] p_current = processedInput.pressure.clone();
+
+
+            // averaged values for all sensors
+            float[] t_averaged = new float[0];
+            float[] p_averaged = new float[0];
+
+            try {
+                t_averaged = smoothed_average(t_smooth, t_current).clone();
+                System.out.println("hello");
+                p_averaged = smoothed_average(p_smooth, p_current).clone();
+                System.out.println("hello after");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+
+
+
             // loop through the cells in the tblLayout
             for (int i = 0; i < processedInput.n; i++) {
                 // get row  i of the tbl
@@ -419,34 +449,65 @@ public class MainActivity extends AppCompatActivity {
 
                 // display sensor_id of i-th sensor on cell[i][0]
                 TextView sensor = (TextView) row.getChildAt(0);
-                //sensor.setText((processedInput.sensor_ID[i]).toString());
                 sensor.setText((processedInput.sensor_ID[i]).toString());
 
                 // display pressure of i-th sensor on cell[i][1]
                 TextView pressure = (TextView) row.getChildAt(1);
-                @SuppressLint("DefaultLocale") String rounded = String.format("%.0f", processedInput.pressure[i]);
-                pressure.setText(rounded);
+                //@SuppressLint("DefaultLocale") String rounded = String.format("%.0f", processedInput.pressure[i]);
+                pressure.setText(String.valueOf(p_averaged[i]));
 
                 // display temp of i-th sensor on cell[i][2]
                 TextView temp = (TextView) row.getChildAt(2);
                 //float t1 = processedInput.temp[i];
                 //t1 = Float.parseFloat(df.format(t1));
-                temp.setText(Float.toString(processedInput.temp[i]));
+                //temp.setText(Float.toString(processedInput.temp[i]));
+                temp.setText(String.valueOf(t_averaged[i]));
 
 
             }
             //float f1 = processedInput.weightedForce;
             //f1 = Float.parseFloat(df.format(f1));
             force_value.setText(Float.toString(processedInput.weightedForce));
+
+            System.out.println("size much after"+t_smooth.size());
         }
     };
+
+    // returns array of floats whose elements are the averaged values for each sensor over smoothing_factor previous values
+    public synchronized float[] smoothed_average(ArrayBlockingQueue<float[]> matrix, float[] new_reading) throws InterruptedException {
+        float [] averaged_reading = new float[n_sensors];
+        //float [] temporary_queue;
+
+        // make use of the fifo structure of the arrayblockingqueue to remove oldest reading at head and add new reading at tail
+        matrix.poll();
+        System.out.println("matrix size" + matrix.size());
+        matrix.put(new_reading);
+        System.out.println("matrix size after" + matrix.size());
+
+        // compute average value per sensor
+        // the index j refers to the sensor
+
+        //forEach method of arrayblockingqueue used to tranverse it w/out removing (unlike take() which also removes elements)
+        for (float[] temporary_queue: matrix){
+            for (int j = 0; j < n_sensors; j++){
+                averaged_reading[j] += temporary_queue[j];
+            }
+        }
+        System.out.println("jesus");
+        for (int j = 0; j < n_sensors; j++){
+            averaged_reading[j] /= smoothing_factor;
+        }
+        System.out.println("averaged" + Arrays.toString(averaged_reading));
+        System.out.println("god");
+        return averaged_reading;
+    }
 
     //UpdateGUI() takes a string value from queue and assigns it to valuestr, then increases the counter k
     //finally it calls myRunnable to modify the UI using a Handler poster.
     private void UpdateGUI() throws InterruptedException {
         try {
             valuestr = queue.take();
-            System.out.println(Arrays.toString(p0) + Arrays.toString(t0));
+            //System.out.println(Arrays.toString(p0) + Arrays.toString(t0));
             //System.out.println(valuestr);
         } catch (InterruptedException e) {
             e.printStackTrace();
