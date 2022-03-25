@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
     ListView lv;
     float[] t0, p0;
     int smoothing_factor = 5;
+    ArrayBlockingQueue<Float> f_smooth;
     ArrayBlockingQueue<float[]> t_smooth, p_smooth;
 
 
@@ -372,12 +373,14 @@ public class MainActivity extends AppCompatActivity {
         }
         t_smooth = new ArrayBlockingQueue<float[]>(smoothing_factor);
         p_smooth = new ArrayBlockingQueue<float[]>(smoothing_factor);
+        f_smooth = new ArrayBlockingQueue<Float>(smoothing_factor);
         for (int i = 0; i < smoothing_factor; i++){
             processedInput = new ProcessedInput(n_sensors, valuestr, p0, t0);
             processedInput.run();
             // clone values of all sensors from a single reading into the i-th reading
             t_smooth.add(processedInput.temp);
             p_smooth.add(processedInput.pressure);
+            f_smooth.add(processedInput.weightedForce);
         }
     }
 
@@ -424,17 +427,17 @@ public class MainActivity extends AppCompatActivity {
 
             float[] t_current = processedInput.temp.clone();
             float[] p_current = processedInput.pressure.clone();
+            float f_current =  processedInput.weightedForce;
 
 
             // averaged values for all sensors
             float[] t_averaged = new float[0];
             float[] p_averaged = new float[0];
-
+            float f_averaged = 0;
             try {
                 t_averaged = smoothed_average(t_smooth, t_current).clone();
-                System.out.println("hello");
                 p_averaged = smoothed_average(p_smooth, p_current).clone();
-                System.out.println("hello after");
+                f_averaged = force_smoothed(f_smooth, f_current);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -458,31 +461,25 @@ public class MainActivity extends AppCompatActivity {
 
                 // display temp of i-th sensor on cell[i][2]
                 TextView temp = (TextView) row.getChildAt(2);
-                //float t1 = processedInput.temp[i];
+                //float t1 = t_averaged[i];
                 //t1 = Float.parseFloat(df.format(t1));
-                //temp.setText(Float.toString(processedInput.temp[i]));
                 temp.setText(String.valueOf(t_averaged[i]));
 
 
             }
             //float f1 = processedInput.weightedForce;
             //f1 = Float.parseFloat(df.format(f1));
-            force_value.setText(Float.toString(processedInput.weightedForce));
-
-            System.out.println("size much after"+t_smooth.size());
+            force_value.setText(Float.toString(f_averaged));
         }
     };
 
     // returns array of floats whose elements are the averaged values for each sensor over smoothing_factor previous values
     public synchronized float[] smoothed_average(ArrayBlockingQueue<float[]> matrix, float[] new_reading) throws InterruptedException {
         float [] averaged_reading = new float[n_sensors];
-        //float [] temporary_queue;
 
         // make use of the fifo structure of the arrayblockingqueue to remove oldest reading at head and add new reading at tail
         matrix.poll();
-        System.out.println("matrix size" + matrix.size());
         matrix.put(new_reading);
-        System.out.println("matrix size after" + matrix.size());
 
         // compute average value per sensor
         // the index j refers to the sensor
@@ -493,13 +490,26 @@ public class MainActivity extends AppCompatActivity {
                 averaged_reading[j] += temporary_queue[j];
             }
         }
-        System.out.println("jesus");
         for (int j = 0; j < n_sensors; j++){
             averaged_reading[j] /= smoothing_factor;
         }
-        System.out.println("averaged" + Arrays.toString(averaged_reading));
-        System.out.println("god");
         return averaged_reading;
+    }
+
+
+    // function returns average value over 'smoothing_factor' weighted_force reading values after updating the blockingqueue when called.
+    public synchronized float force_smoothed(ArrayBlockingQueue<Float> queue, float weighted_force) throws InterruptedException {
+        float temporary_force = 0;
+
+        queue.poll();
+        queue.put(weighted_force);
+
+        for (Float queue_value: queue){
+            temporary_force += queue_value;
+        }
+
+        temporary_force /= smoothing_factor;
+        return temporary_force;
     }
 
     //UpdateGUI() takes a string value from queue and assigns it to valuestr, then increases the counter k
